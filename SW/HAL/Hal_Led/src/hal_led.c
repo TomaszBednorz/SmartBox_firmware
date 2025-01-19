@@ -11,11 +11,6 @@
  ************************************************* Macros **************************************************
  ***********************************************************************************************************/
 
-/* 
- * Duty cycle range: 0 - 10000 (0 - 100%)
- */
-#define HAL_LED_DUTY_CYCLE_MAX      (10000U)
-
 /**
  * @brief Set the period and pulse width in nanoseconds.
  *
@@ -25,7 +20,7 @@
  * @return A value from pwm_set_dt().
  */
 #define Hal_Led_SetPeriodAndPulse(color, period, pulse)  \
-    pwm_set_dt(&Hal_Led_PwmLed[led], period, pulse)
+    pwm_set_dt(&Hal_Led_PwmLed[color], period, pulse)
 
 /**
  * @brief Set the pulse width in nanoseconds.
@@ -35,7 +30,7 @@
  * @return A value from pwm_set_pulse_dt().
  */
 #define Hal_Led_SetPulse(color, pulse)  \
-    pwm_set_pulse_dt(&Hal_Led_PwmLed[led], pulse)
+    pwm_set_pulse_dt(&Hal_Led_PwmLed[color], pulse)
 
 /***********************************************************************************************************
  *********************************************** Data types ************************************************
@@ -77,17 +72,17 @@ System_Ret_t Hal_Led_Init(void)
 
     for(uint8_t i = 0; i < (uint8_t)HAL_LED_MAX; i++)
     {
-        if(!pwm_is_ready_dt(&Hal_Led_PwmLed[i]))
+        if(true != pwm_is_ready_dt(&Hal_Led_PwmLed[i]))
         {
             ret = SYSTEM_NOK;
         }
 
-        if(!pwm_is_ready_dt(&Hal_Led_PwmLed[i]))
+        if(true != pwm_is_ready_dt(&Hal_Led_PwmLed[i]))
         {
             ret = SYSTEM_NOK;
         }
 
-        if(!Hal_Led_SetPeriodAndPulse((Hal_Led_Color_t)i, HAL_LED_CFG_DEFAULT_PERIOD, 0U))
+        if(0 != Hal_Led_SetPeriodAndPulse((Hal_Led_Color_t)i, HAL_LED_CFG_DEFAULT_PERIOD, 0U))
         {
             ret = SYSTEM_NOK;
         }
@@ -112,7 +107,7 @@ System_Ret_t Hal_Led_SetDutyCycle(const Hal_Led_Color_t color, const uint16_t du
     {
         pulse = HAL_LED_CFG_DEFAULT_PERIOD * duty_cycle / HAL_LED_DUTY_CYCLE_MAX;
 
-        if(Hal_Led_SetPulse(color, pulse))
+        if(0 == Hal_Led_SetPulse(color, pulse))
         {
             ret = SYSTEM_OK;
         }
