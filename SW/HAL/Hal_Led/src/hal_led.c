@@ -105,7 +105,8 @@ System_Ret_t Hal_Led_SetDutyCycle(const Hal_Led_Color_t color, const uint16_t du
     
     if(duty_cycle <= HAL_LED_DUTY_CYCLE_MAX)
     {
-        pulse = HAL_LED_CFG_DEFAULT_PERIOD * duty_cycle / HAL_LED_DUTY_CYCLE_MAX;
+        pulse = HAL_LED_CFG_DEFAULT_PERIOD / HAL_LED_DUTY_CYCLE_MAX;
+        pulse *= duty_cycle;
 
         if(0 == Hal_Led_SetPulse(color, pulse))
         {
