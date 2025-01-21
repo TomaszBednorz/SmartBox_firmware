@@ -26,7 +26,7 @@
  ************************************** Exported function prototypes ***************************************
  ***********************************************************************************************************/
 
-void App_Led_Init(void);
-void App_Led_SetLedRgbColor(uint16_t red, uint16_t green, uint16_t blue);
+System_Ret_t App_Led_Init(void);
+System_Ret_t App_Led_SetLedRgbColor(uint16_t red, uint16_t green, uint16_t blue);
 
 #endif  /* _XYZ_H_ */

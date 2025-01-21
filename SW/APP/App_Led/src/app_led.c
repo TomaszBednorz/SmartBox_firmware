@@ -13,10 +13,6 @@
 /* Mask for LED event data ready */
 #define APP_LED_EVENT_DATA_RDY_MASK     (0x100)
 
-/* Initial and limit semaphore count */
-#define APP_LED_SEMAPHORE_INIT_CNT      (1U)
-#define APP_LED_SEMAPHORE_LIMIT_CNT     (1U)
-
 /***********************************************************************************************************
  *********************************************** Data types ************************************************
  ***********************************************************************************************************/
@@ -49,7 +45,7 @@ static App_Led_Brightness_t App_Led_BrightnessActual;
 static App_Led_Brightness_t App_Led_BrightnessNew;
 
 static struct k_event App_Led_EventDataRdy;
-static struct k_sem App_Led_SemDataProtect;
+static struct k_mutex App_Led_MutexDataProtect;
 
 /* Thread definition for LED data processing */
 K_THREAD_DEFINE(App_Led_Thread, APP_LED_THREAD_STACKSIZE, App_Led_ThreadProcessData, NULL, NULL, NULL, APP_LED_THREAD_PRIORITY, 0U, 0U);
@@ -61,14 +57,22 @@ K_THREAD_DEFINE(App_Led_Thread, APP_LED_THREAD_STACKSIZE, App_Led_ThreadProcessD
 /**
  * @brief Initialize the LED application module.
  *        This function initializes the event for data availability indication
- *        and a semaphore to protect LED data.
+ *        and a matex to protect LED data.
  * @param None
  * @return None
  */
-void App_Led_Init(void)
+System_Ret_t App_Led_Init(void)
 {
+    System_Ret_t ret = SYSTEM_OK;
+
     k_event_init(&App_Led_EventDataRdy);   
-    k_sem_init(&App_Led_SemDataProtect, APP_LED_SEMAPHORE_INIT_CNT, APP_LED_SEMAPHORE_LIMIT_CNT); 
+
+    if(0 != k_mutex_init(&App_Led_MutexDataProtect))
+    {
+        ret = SYSTEM_NOK;
+    }
+
+    return ret;
 }
 
 /**
@@ -79,19 +83,25 @@ void App_Led_Init(void)
  * @param blue Brightness of the blue LED from 0 (0%) to 10000 (100%).
  * @return None
  */
-void App_Led_SetLedRgbColor(uint16_t red, uint16_t green, uint16_t blue)
+System_Ret_t App_Led_SetLedRgbColor(uint16_t red, uint16_t green, uint16_t blue)
 {
-    /* Protect data from concurrent access, see: @APP_LED_SEM_NOTE */
-    if(0 == k_sem_take(&App_Led_SemDataProtect, K_FOREVER))
+    System_Ret_t ret = SYSTEM_NOK;
+    
+    /* Protect data from concurrent access, see: @APP_LED_MUTEX_NOTE */
+    if(0 == k_mutex_lock(&App_Led_MutexDataProtect, K_MSEC(20)))
     {
         App_Led_BrightnessNew.red = red;
         App_Led_BrightnessNew.green = green;
         App_Led_BrightnessNew.blue = blue;
+
+        if(0 == k_mutex_unlock(&App_Led_MutexDataProtect))
+        {
+            k_event_post(&App_Led_EventDataRdy, APP_LED_EVENT_DATA_RDY_MASK);
+            ret = SYSTEM_OK;
+        }
     }
 
-    k_sem_give(&App_Led_SemDataProtect);
-
-    k_event_post(&App_Led_EventDataRdy, APP_LED_EVENT_DATA_RDY_MASK);
+    return ret;
 }
 
 /***********************************************************************************************************
@@ -121,11 +131,11 @@ static void App_Led_ThreadProcessData(void *unused1, void *unused2, void *unused
             /* 
             * Protect data from concurrent access.
             * Concurrent access to members of the App_Led_BrightnessActual structure is forbidden.
-            * The semaphore protects against situations where the duty cycle is updated, and preemption
+            * The mutex protects against situations where the duty cycle is updated, and preemption
             * occurs right after it, before the value in App_Led_BrightnessActual is updated.
-            * ref: @APP_LED_SEM_NOTE
+            * ref: @APP_LED_MUTEX_NOTE
             */
-            if(0 == k_sem_take(&App_Led_SemDataProtect, K_FOREVER))
+            if(0 == k_mutex_lock(&App_Led_MutexDataProtect, K_FOREVER))
             {
                 /* Update the red LED */
                 if(App_Led_BrightnessNew.red != App_Led_BrightnessActual.red)
@@ -153,9 +163,13 @@ static void App_Led_ThreadProcessData(void *unused1, void *unused2, void *unused
                         App_Led_BrightnessActual.blue = App_Led_BrightnessNew.blue;
                     }
                 }
-            }
 
-            k_sem_give(&App_Led_SemDataProtect);
+                if(0 == k_mutex_unlock(&App_Led_MutexDataProtect))
+                {
+                    /* This situation shall never happen. */
+                    SYSTEM_ERR("APP LED: Mutex can't be unlocked");
+                }
+            }
         }
     }
 }
