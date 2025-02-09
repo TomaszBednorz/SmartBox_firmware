@@ -164,7 +164,7 @@ static void App_Led_ThreadProcessData(void *unused1, void *unused2, void *unused
                     }
                 }
 
-                if(0 == k_mutex_unlock(&App_Led_MutexDataProtect))
+                if(0 != k_mutex_unlock(&App_Led_MutexDataProtect))
                 {
                     /* This situation shall never happen. */
                     SYSTEM_ERR("APP LED: Mutex can't be unlocked");
