@@ -6,6 +6,7 @@
 #include <zephyr/bluetooth/gap.h>
 #include <zephyr/bluetooth/uuid.h>
 #include <zephyr/bluetooth/conn.h>
+#include <zephyr/bluetooth/gatt.h>
 
 #include "hal_ble.h"
 #include "hal_ble_cfg.h"
@@ -27,6 +28,8 @@
 
 static void Hal_Ble_Connected(struct bt_conn *conn, uint8_t err);
 static void Hal_Ble_Disconnected(struct bt_conn *conn, uint8_t reason);
+static ssize_t Hal_Ble_WriteLeds(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, 
+						 		 uint16_t len, uint16_t offset, uint8_t flags);
 
 /***********************************************************************************************************
  ******************************************** Exported objects *********************************************
@@ -51,11 +54,19 @@ static const struct bt_data Hal_Ble_AdvertisementPacket[] = {
 	BT_DATA(BT_DATA_NAME_COMPLETE, HAL_BLE_DEVICE_NAME, HAL_BLE_DEVICE_NAME_LEN),
 };
 
-static unsigned char test[] ={0x17,'/','/','T','E','S','T','T','E','S','T','T','E','S','T'};
-
 static const struct bt_data Hal_Ble_ScanResponsePacket[] = {
-	BT_DATA(BT_DATA_URI, test, sizeof(test)),
+	BT_DATA_BYTES(BT_DATA_UUID128_ALL, HAL_BLE_UUID_SERVICE_VAL),
 };
+
+/* 
+ * BLE Service Declaration 
+ */
+BT_GATT_SERVICE_DEFINE(Hal_Ble_service,
+BT_GATT_PRIMARY_SERVICE(HAL_BLE_UUID_SERVICE),
+	BT_GATT_CHARACTERISTIC(HAL_BLE_UUID_LEDS_CHAR,
+		BT_GATT_CHRC_WRITE, BT_GATT_PERM_WRITE, 
+		NULL, Hal_Ble_WriteLeds, NULL),
+);
 
 /***********************************************************************************************************
  ******************************************* Exported functions ********************************************
@@ -113,7 +124,7 @@ static void Hal_Ble_Connected(struct bt_conn *conn, uint8_t err)
 	Hal_Ble_ConnectedCb(conn, err);
 
 	if (err) {
-		printk("Connection failed, err 0x%02x \n", err);
+		SYSTEM_LOG("Connection failed, err 0x%02x \n", err);
 		return;
 	}
 }
@@ -121,4 +132,26 @@ static void Hal_Ble_Connected(struct bt_conn *conn, uint8_t err)
 static void Hal_Ble_Disconnected(struct bt_conn *conn, uint8_t reason)
 {
 	Hal_Ble_DisconnectedCb(conn, reason);
+}
+
+static ssize_t Hal_Ble_WriteLeds(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, 
+								 uint16_t len, uint16_t offset, uint8_t flags)
+{
+	ssize_t ret_val;
+
+	if (len != 6U) {
+		SYSTEM_ERR("Write led: Incorrect data length");
+		ret_val = BT_GATT_ERR(BT_ATT_ERR_INVALID_ATTRIBUTE_LEN);
+	}
+	else if (offset != 0) {
+		SYSTEM_ERR("Write led: Incorrect data offset");
+		ret_val = BT_GATT_ERR(BT_ATT_ERR_INVALID_OFFSET);
+	}
+	else
+	{
+		Hal_Ble_WriteLedsCb(buf, len);
+		ret_val = len;
+	}
+
+	return ret_val;
 }

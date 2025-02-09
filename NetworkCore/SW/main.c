@@ -18,10 +18,17 @@ int main(void)
 
 void test_thread(void)
 {
+	uint16_t cnt = 0;
+
 	while(1)
 	{	
-		k_sleep(K_MSEC(100));
+		cnt++;
+
+		printk("%d\n", cnt);
+
+		k_sleep(K_MSEC(2000));
 	}
 }
 
 K_THREAD_DEFINE(thread1, MY_STACK_SIZE, test_thread, NULL, NULL, NULL, MY_PRIORITY, 0, 0);
+
