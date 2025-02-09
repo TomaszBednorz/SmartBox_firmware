@@ -9,8 +9,11 @@ target_include_directories(app PRIVATE
     SW/SRV/
     SW/HAL/Hal_Ble/src
     SW/HAL/Hal_Ble/cfg
+    SW/HAL/Hal_Ipc/src
+    SW/HAL/Hal_Ipc/cfg
 )
 
 target_sources(app PRIVATE 
     SW/main.c 
-    SW/HAL/Hal_Ble/src/hal_ble.c)
+    SW/HAL/Hal_Ble/src/hal_ble.c
+    SW/HAL/Hal_Ipc/src/hal_ipc.c)

@@ -15,3 +15,4 @@ The main purpose of this project is to create an IoT device with simple function
 - [x] RGB diode, PWM
 - [ ] Battery condition
 - [ ] Button
+- [ ] Interprocessor communication
