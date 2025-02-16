@@ -5,6 +5,7 @@
  ********************************************* Included files **********************************************
  ***********************************************************************************************************/
 
+#include "hal_ipc.h"
 
 /***********************************************************************************************************
  ************************************************* Macros **************************************************
@@ -15,7 +16,7 @@
  */
 #define Hal_Ble_ConnectedCb(conn, err)          do{} while(0)
 #define Hal_Ble_DisconnectedCb(conn, reason)    do{} while(0)
-#define Hal_Ble_WriteLedsCb(buf, len)           do{} while(0)
+#define Hal_Ble_WriteLedsCb(buf, len)           Hal_Ipc_Send(len, buf)
 
 /*
  * Advertising interval configuration, scale factor = 0.625ms
@@ -31,6 +32,9 @@
 
 #define HAL_BLE_UUID_SERVICE          BT_UUID_DECLARE_128(HAL_BLE_UUID_SERVICE_VAL)
 #define HAL_BLE_UUID_LEDS_CHAR        BT_UUID_DECLARE_128(HAL_BLE_UUID_LEDS_CHAR_VAL)
+
+
+#define HAL_BLE_LEDS_DATA_LEN         (8U)
 
 /***********************************************************************************************************
  *********************************************** Data types ************************************************

@@ -114,7 +114,8 @@ static void Hal_Ipc_Bound(void *priv)
 static void Hal_Ipc_Received(const void *data, size_t len, void *priv)
 {
     memcpy(Hal_Ipc_ReceivedDataBuf, (uint8_t*)data, len);
-    Hal_Ipc_ReceivedCb(len, Hal_Ipc_ReceivedDataBuf);
+
+    Hal_Ipc_ReceivedCb((uint8_t)len, Hal_Ipc_ReceivedDataBuf);
 }
 
 /**

@@ -124,7 +124,7 @@ static void App_Led_ThreadProcessData(void *unused1, void *unused2, void *unused
 
     while(1)
     {
-        events = k_event_wait(&App_Led_EventDataRdy, APP_LED_EVENT_DATA_RDY_MASK, false, K_FOREVER);
+        events = k_event_wait(&App_Led_EventDataRdy, APP_LED_EVENT_DATA_RDY_MASK, true, K_FOREVER);
         
         if (APP_LED_EVENT_DATA_RDY_MASK == events) 
         {

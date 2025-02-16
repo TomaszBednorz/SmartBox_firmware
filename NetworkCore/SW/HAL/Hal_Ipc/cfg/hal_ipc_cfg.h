@@ -10,7 +10,7 @@
  ***********************************************************************************************************/
 
  /* Max size of internal IPC buffer */
-#define HAL_IPC_RECEIVED_DATA_BUF_SIZE      (100U)
+#define HAL_IPC_RECEIVED_DATA_BUF_SIZE      (20U)
 
 /* 
  * Callbacks 

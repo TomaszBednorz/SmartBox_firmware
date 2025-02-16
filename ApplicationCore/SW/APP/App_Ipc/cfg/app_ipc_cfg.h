@@ -1,23 +1,27 @@
-#ifndef _HAL_IPC_CFG_H_
-#define _HAL_IPC_CFG_H_
+#ifndef _APP_IPC_CFG_H_
+#define _APP_IPC_CFG_H_
 
 /***********************************************************************************************************
  ********************************************* Included files **********************************************
  ***********************************************************************************************************/
 
-#include "app_ipc_cb.h"
-
 /***********************************************************************************************************
  ************************************************* Macros **************************************************
  ***********************************************************************************************************/
 
- /* Max size of internal IPC buffer */
-#define HAL_IPC_RECEIVED_DATA_BUF_SIZE      (20U)
+ /* Max size of internal IPC buffers */
+ #define APP_IPC_MAX_DATA_BUF_SIZE      (20U)
+
+ #define APP_IPC_THREAD_STACKSIZE   (1024U)
+ #define APP_IPC_THREAD_PRIORITY    (4U)
 
 /* 
- * Callbacks 
+ * Message configuration table:
+ * name, id (0-31), len, read data permission, write data permission
  */
-#define Hal_Ipc_ReceivedCb(len, data)          App_Ipc_ReceivedCb(len, data)
+#define APP_IPC_MESSAGE_CFG_TABLE(X) \
+    X(APP_IPC_TYPE_LEDS, 0x00, 6U, false, true)
+
 
 /***********************************************************************************************************
  *********************************************** Data types ************************************************
@@ -31,4 +35,4 @@
  ************************************** Exported function prototypes ***************************************
  ***********************************************************************************************************/
 
-#endif  /* _HAL_IPC_CFG_H_ */
+#endif  /* _APP_IPC_CFG_H_ */
