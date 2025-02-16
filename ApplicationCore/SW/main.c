@@ -2,7 +2,10 @@
 #include <zephyr/sys/printk.h>
 
 #include "hal_led.h"
+#include "hal_ipc.h"
+
 #include "app_led.h"
+#include "app_ipc.h"
 
 #define MY_STACK_SIZE 512
 #define MY_PRIORITY 7
@@ -12,14 +15,12 @@ void test_thread(void);
 int main(void)
 {
 	printk("Hello World! %s\n", CONFIG_BOARD_TARGET);
-
+	
+	Hal_Ipc_Init();
 	Hal_Led_Init();
 
+	App_Ipc_Init();
 	App_Led_Init();
-
-	for (;;) {
-		k_sleep(K_MSEC(1000));
-	}
 
 	return 0;
 }
@@ -34,9 +35,7 @@ void test_thread(void)
 
 		printk("%d\n", cnt);
 
-		App_Led_SetLedRgbColor(cnt * 100, cnt * 100, cnt * 100);
-
-		k_sleep(K_MSEC(100));
+		k_sleep(K_MSEC(1000));
 	}
 }
 

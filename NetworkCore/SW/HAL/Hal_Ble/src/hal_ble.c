@@ -139,7 +139,7 @@ static ssize_t Hal_Ble_WriteLeds(struct bt_conn *conn, const struct bt_gatt_attr
 {
 	ssize_t ret_val;
 
-	if (len != 6U) {
+	if (len != HAL_BLE_LEDS_DATA_LEN) {
 		SYSTEM_ERR("Write led: Incorrect data length");
 		ret_val = BT_GATT_ERR(BT_ATT_ERR_INVALID_ATTRIBUTE_LEN);
 	}
@@ -149,7 +149,7 @@ static ssize_t Hal_Ble_WriteLeds(struct bt_conn *conn, const struct bt_gatt_attr
 	}
 	else
 	{
-		Hal_Ble_WriteLedsCb(buf, len);
+		Hal_Ble_WriteLedsCb((uint8_t*)buf, (uint8_t)len);
 		ret_val = len;
 	}
 

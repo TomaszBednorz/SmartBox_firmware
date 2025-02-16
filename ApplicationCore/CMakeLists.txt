@@ -9,14 +9,17 @@ target_include_directories(app PRIVATE
     SW/SRV/
     SW/HAL/Hal_Led/src
     SW/HAL/Hal_Led/cfg
+    SW/HAL/Hal_Ipc/src
+    SW/HAL/Hal_Ipc/cfg
     SW/APP/App_Led/src
     SW/APP/App_Led/cfg
-    SW/APP/App_Ble/src
-    SW/APP/App_Ble/cfg
+    SW/APP/App_Ipc/src
+    SW/APP/App_Ipc/cfg
 )
 
 target_sources(app PRIVATE 
     SW/main.c 
     SW/HAL/Hal_Led/src/hal_led.c
+    SW/HAL/Hal_Ipc/src/hal_ipc.c
     SW/APP/App_Led/src/app_led.c
-    SW/APP/App_Ble/src/app_ble.c)
+    SW/APP/App_Ipc/src/app_ipc.c)

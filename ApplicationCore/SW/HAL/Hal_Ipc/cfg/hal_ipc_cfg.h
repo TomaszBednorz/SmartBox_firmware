@@ -1,40 +1,23 @@
-#ifndef _HAL_BLE_CFG_H_
-#define _HAL_BLE_CFG_H_
+#ifndef _HAL_IPC_CFG_H_
+#define _HAL_IPC_CFG_H_
 
 /***********************************************************************************************************
  ********************************************* Included files **********************************************
  ***********************************************************************************************************/
 
-#include "hal_ipc.h"
+#include "app_ipc_cb.h"
 
 /***********************************************************************************************************
  ************************************************* Macros **************************************************
  ***********************************************************************************************************/
 
+ /* Max size of internal IPC buffer */
+#define HAL_IPC_RECEIVED_DATA_BUF_SIZE      (20U)
+
 /* 
  * Callbacks 
  */
-#define Hal_Ble_ConnectedCb(conn, err)          do{} while(0)
-#define Hal_Ble_DisconnectedCb(conn, reason)    do{} while(0)
-#define Hal_Ble_WriteLedsCb(buf, len)           Hal_Ipc_Send(len, buf)
-
-/*
- * Advertising interval configuration, scale factor = 0.625ms
- */
-#define HAL_BLE_ADVERT_INTERVAL_MIN     (800U)  /* 500ms */
-#define HAL_BLE_ADVERT_INTERVAL_MAX     (960U)  /* 600ms */
-
-/*
- * UUID (Universally Unique Identifier) definisions
- */
-#define HAL_BLE_UUID_SERVICE_VAL      BT_UUID_128_ENCODE(0x00001523, 0x1112, 0xefde, 0x1523, 0x785feabcd123)
-#define HAL_BLE_UUID_LEDS_CHAR_VAL    BT_UUID_128_ENCODE(0x00001524, 0x1112, 0xefde, 0x1523, 0x785feabcd123)
-
-#define HAL_BLE_UUID_SERVICE          BT_UUID_DECLARE_128(HAL_BLE_UUID_SERVICE_VAL)
-#define HAL_BLE_UUID_LEDS_CHAR        BT_UUID_DECLARE_128(HAL_BLE_UUID_LEDS_CHAR_VAL)
-
-
-#define HAL_BLE_LEDS_DATA_LEN         (8U)
+#define Hal_Ipc_ReceivedCb(len, data)          App_Ipc_ReceivedCb(len, data)
 
 /***********************************************************************************************************
  *********************************************** Data types ************************************************
@@ -48,4 +31,4 @@
  ************************************** Exported function prototypes ***************************************
  ***********************************************************************************************************/
 
-#endif  /* _APP_BLE_CFG_H_ */
+#endif  /* _HAL_IPC_CFG_H_ */

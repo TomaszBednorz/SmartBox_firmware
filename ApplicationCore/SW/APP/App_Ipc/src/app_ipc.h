@@ -1,44 +1,28 @@
-#ifndef _HAL_BLE_CFG_H_
-#define _HAL_BLE_CFG_H_
+#ifndef _APP_IPC_H_
+#define _APP_IPC_H_
 
 /***********************************************************************************************************
  ********************************************* Included files **********************************************
  ***********************************************************************************************************/
 
-#include "hal_ipc.h"
+#include "system_utils.h"
+
+#include "app_ipc_cfg.h"
 
 /***********************************************************************************************************
  ************************************************* Macros **************************************************
  ***********************************************************************************************************/
 
-/* 
- * Callbacks 
- */
-#define Hal_Ble_ConnectedCb(conn, err)          do{} while(0)
-#define Hal_Ble_DisconnectedCb(conn, reason)    do{} while(0)
-#define Hal_Ble_WriteLedsCb(buf, len)           Hal_Ipc_Send(len, buf)
-
-/*
- * Advertising interval configuration, scale factor = 0.625ms
- */
-#define HAL_BLE_ADVERT_INTERVAL_MIN     (800U)  /* 500ms */
-#define HAL_BLE_ADVERT_INTERVAL_MAX     (960U)  /* 600ms */
-
-/*
- * UUID (Universally Unique Identifier) definisions
- */
-#define HAL_BLE_UUID_SERVICE_VAL      BT_UUID_128_ENCODE(0x00001523, 0x1112, 0xefde, 0x1523, 0x785feabcd123)
-#define HAL_BLE_UUID_LEDS_CHAR_VAL    BT_UUID_128_ENCODE(0x00001524, 0x1112, 0xefde, 0x1523, 0x785feabcd123)
-
-#define HAL_BLE_UUID_SERVICE          BT_UUID_DECLARE_128(HAL_BLE_UUID_SERVICE_VAL)
-#define HAL_BLE_UUID_LEDS_CHAR        BT_UUID_DECLARE_128(HAL_BLE_UUID_LEDS_CHAR_VAL)
-
-
-#define HAL_BLE_LEDS_DATA_LEN         (8U)
-
 /***********************************************************************************************************
  *********************************************** Data types ************************************************
  ***********************************************************************************************************/
+
+typedef enum {
+    #define APP_IPC_GENERATE_INSTANCE(name, id, len, r, w) name,
+    APP_IPC_MESSAGE_CFG_TABLE(APP_IPC_GENERATE_INSTANCE)
+    #undef APP_IPC_GENERATE_INSTANCE
+    APP_IPC_TYPE_MAX
+}App_Ipc_MessageType_t;
 
 /***********************************************************************************************************
  ********************************************* Exported objects ********************************************
@@ -48,4 +32,8 @@
  ************************************** Exported function prototypes ***************************************
  ***********************************************************************************************************/
 
-#endif  /* _APP_BLE_CFG_H_ */
+System_Ret_t App_Ipc_Init(void);
+System_Ret_t App_Ipc_Read(App_Ipc_MessageType_t type, uint8_t* data);
+System_Ret_t App_Ipc_Write(App_Ipc_MessageType_t type, uint8_t* data);
+
+#endif  /* _APP_IPC_H_ */
