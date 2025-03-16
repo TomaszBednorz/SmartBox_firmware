@@ -6,6 +6,8 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(SmartBox_firmware)
 
 target_include_directories(app PRIVATE 
+    SW/DRV/Drv_Gpio/src
+    SW/DRV/Drv_Gpio/cfg
     SW/SRV/
     SW/HAL/Hal_Led/src
     SW/HAL/Hal_Led/cfg
@@ -19,6 +21,7 @@ target_include_directories(app PRIVATE
 
 target_sources(app PRIVATE 
     SW/main.c 
+    SW/DRV/Drv_Gpio/src/drv_gpio.c
     SW/HAL/Hal_Led/src/hal_led.c
     SW/HAL/Hal_Ipc/src/hal_ipc.c
     SW/APP/App_Led/src/app_led.c
