@@ -9,6 +9,7 @@ target_include_directories(app PRIVATE
     SW/DRV/Drv_Gpio/src
     SW/DRV/Drv_Gpio/cfg
     SW/SRV/
+    SW/SRV/Lowpass_Filter\Src
     SW/HAL/Hal_Led/src
     SW/HAL/Hal_Led/cfg
     SW/HAL/Hal_Ipc/src
@@ -22,6 +23,7 @@ target_include_directories(app PRIVATE
 target_sources(app PRIVATE 
     SW/main.c 
     SW/DRV/Drv_Gpio/src/drv_gpio.c
+    SW/SRV/Lowpass_Filter\Src\lowpass_filter.c
     SW/HAL/Hal_Led/src/hal_led.c
     SW/HAL/Hal_Ipc/src/hal_ipc.c
     SW/APP/App_Led/src/app_led.c
