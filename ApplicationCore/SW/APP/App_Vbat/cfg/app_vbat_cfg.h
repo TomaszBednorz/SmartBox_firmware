@@ -1,34 +1,42 @@
-#ifndef _DRV_GPIO_H_
-#define _DRV_GPIO_H_
+#ifndef _APP_VBAT_CFG_H_
+#define _APP_VBAT_CFG_H_
 
 /***********************************************************************************************************
  ********************************************* Included files **********************************************
  ***********************************************************************************************************/
 
 #include "system_utils.h"
-#include "drv_gpio_cfg.h"
 
 /***********************************************************************************************************
  ************************************************* Macros **************************************************
  ***********************************************************************************************************/
 
-#define DRV_GPIO_PIN_STATE_ACTIVE     (1)
-#define DRV_GPIO_PIN_STATE_INACTIVE   (0)
+#define APP_VBAT_THREAD_STACKSIZE   (1024U)
+#define APP_VBAT_THREAD_PRIORITY    (8U)
+#define APP_VBAT_RHREAD_PERIOD      (100)  /* ms */
+
+/* Calculation of the scaling factor - voltage devider*/
+#define APP_VBAT_CFG_OUTPUT_OHMS   (180000.0f)  // R1
+#define APP_VBAT_CFG_FULL_OHMS     (1500000.0f + 180000.0f)  // R2
+#define APP_VBAT_CFG_SCALE_FACTOR  ((float)APP_VBAT_CFG_FULL_OHMS / (float)APP_VBAT_CFG_OUTPUT_OHMS)
+
+#define APP_VBAT_CFG_ADC_RESOLUTION (4096.0f)  /* 12-bit ADC */
+#define APP_VBAT_CFG_ADC_MAX_VREF   (600.f)    /* mV */
+
+/* Smoothing factor for the lowpass filter */
+#define APP_VBAT_FILTER_ALFA		(0.5f)
+
+/* 
+ * LITHIUM_ION_POLYMER 
+ * The curve is 11 element representing the OCV voltage in miliovolts for each charge percentage
+ * from 0% to 100% inclusive in 10% increments.
+ */
+#define APP_VBAT_CFG_BATTERY_CURVE                                             \
+	{2502.0f, 3146.0f, 3372.0f, 3449.0f, 3532.0f, 3602.0f, 3680.0f, 3764.0f, 3842.0f, 3936.0f, 4032.0f}  /* mV */
 
 /***********************************************************************************************************
  *********************************************** Data types ************************************************
  ***********************************************************************************************************/
-
-/**
- * @brief Enumeration of GPIO pins.
- */
-typedef enum
-{
-    #define DRV_GPIO_GENERATE_PIN(name, label, prop, dir, int) name,
-    DRV_GPIO_PINS_CFG_TABLE(DRV_GPIO_GENERATE_PIN)
-    #undef DRV_GPIO_GENERATE_PIN
-    DRV_GPIO_PIN_MAX
-} Drv_Gpio_Pin_t;
 
 /***********************************************************************************************************
  ********************************************* Exported objects ********************************************
@@ -38,8 +46,4 @@ typedef enum
  ************************************** Exported function prototypes ***************************************
  ***********************************************************************************************************/
 
-System_Ret_t Drv_Gpio_Init(void);
-void Drv_Gpio_Write(Drv_Gpio_Pin_t pin, int state);
-int Drv_Gpio_Read(Drv_Gpio_Pin_t pin);
-
-#endif  /* _DRV_GPIO_H_ */
+#endif  /* _APP_VBAT_CFG_H_ */

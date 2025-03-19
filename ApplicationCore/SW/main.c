@@ -3,9 +3,11 @@
 
 #include "hal_led.h"
 #include "hal_ipc.h"
+#include "hal_vbat.h"
 
 #include "app_led.h"
 #include "app_ipc.h"
+#include "app_vbat.h"
 
 #define MY_STACK_SIZE 512
 #define MY_PRIORITY 7
@@ -16,11 +18,13 @@ int main(void)
 {
 	printk("Hello World! %s\n", CONFIG_BOARD_TARGET);
 	
+	Hal_Vbat_Init();
 	Hal_Ipc_Init();
 	Hal_Led_Init();
 
 	App_Ipc_Init();
 	App_Led_Init();
+	App_Vbat_Init();
 
 	return 0;
 }
