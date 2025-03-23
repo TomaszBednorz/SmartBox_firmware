@@ -6,6 +6,8 @@
 #include "app_ipc_cb.h"
 #include "app_led.h"
 
+#include "hal_ipc.h"
+
 /***********************************************************************************************************
  ************************************************* Macros **************************************************
  ***********************************************************************************************************/
@@ -14,6 +16,8 @@
 #define APP_IPC_MESSAGE_ID_IDX       (0U)
 #define APP_IPC_MESSAGE_LEN_IDX      (1U)
 #define APP_IPC_MESSAGE_PAYLOAD_IDX  (2U)
+
+#define APP_IPC_MESSAGE_OVERHEAD_LEN (APP_IPC_MESSAGE_PAYLOAD_IDX)
 
 /* Indexes of fields in IPC message for LEDs */
 #define APP_IPC_MESSAGE_LEDS_RED_IDX     (0U)
@@ -43,6 +47,7 @@ typedef struct {
 
 static void App_Ipc_ThreadProcessData(void *unused1, void *unused2, void *unused3);
 static void App_Ipc_ProcessLeds(void);
+static void App_Ipc_WriteFillBuffer(App_Ipc_MessageType_t type, uint8_t* data);
 
 /***********************************************************************************************************
  ******************************************** Exported objects *********************************************
@@ -91,7 +96,15 @@ System_Ret_t App_Ipc_Read(App_Ipc_MessageType_t type, uint8_t* data)
 
 System_Ret_t App_Ipc_Write(App_Ipc_MessageType_t type, uint8_t* data)
 {
-    // TODO
+    System_Ret_t ret = SYSTEM_NOK;
+
+    if(true == App_Ipc_Instance[type].write_perm)
+    {
+        App_Ipc_WriteFillBuffer(type, data);
+
+        ret = Hal_Ipc_Send(APP_IPC_MESSAGE_OVERHEAD_LEN + App_Ipc_Instance[type].len, App_Ipc_Instance[type].payload);
+    }
+
     return SYSTEM_NOK;
 }
 
@@ -168,5 +181,17 @@ static void App_Ipc_ProcessLeds(void)
     if(SYSTEM_OK != App_Led_SetLedRgbColor(red, green, blue))
     {
         SYSTEM_ERR("APP IPC: Unsuccessful LEDs color configuration");
+    }
+}
+
+
+static void App_Ipc_WriteFillBuffer(App_Ipc_MessageType_t type, uint8_t* data)
+{
+    App_Ipc_Instance[type].payload[APP_IPC_MESSAGE_ID_IDX] = App_Ipc_Instance[type].id;
+    App_Ipc_Instance[type].payload[APP_IPC_MESSAGE_LEN_IDX] = App_Ipc_Instance[type].len;
+
+    for(uint8_t i = 0; i < App_Ipc_Instance[type].len; i++)
+    {
+        App_Ipc_Instance[type].payload[APP_IPC_MESSAGE_PAYLOAD_IDX + i] = data[i];
     }
 }

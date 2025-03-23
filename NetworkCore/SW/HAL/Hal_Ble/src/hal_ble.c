@@ -2,6 +2,8 @@
  ********************************************* Included files **********************************************
  ***********************************************************************************************************/
 
+#include "system_utils.h"
+
 #include <zephyr/bluetooth/bluetooth.h>
 #include <zephyr/bluetooth/gap.h>
 #include <zephyr/bluetooth/uuid.h>
@@ -10,6 +12,8 @@
 
 #include "hal_ble.h"
 #include "hal_ble_cfg.h"
+
+#include "hal_ipc_decode.h"
 
 /***********************************************************************************************************
  ************************************************* Macros **************************************************
@@ -26,10 +30,12 @@
  **************************************** Local function prototypes ****************************************
  ***********************************************************************************************************/
 
+static void Hal_Ble_ThreadNotify(void *unused1, void *unused2, void *unused3);
 static void Hal_Ble_Connected(struct bt_conn *conn, uint8_t err);
 static void Hal_Ble_Disconnected(struct bt_conn *conn, uint8_t reason);
 static ssize_t Hal_Ble_WriteLeds(struct bt_conn *conn, const struct bt_gatt_attr *attr, const void *buf, 
 						 		 uint16_t len, uint16_t offset, uint8_t flags);
+static void Hal_Ble_NotifyVbatt(const struct bt_gatt_attr *attr, uint16_t value);
 
 /***********************************************************************************************************
  ******************************************** Exported objects *********************************************
@@ -66,7 +72,17 @@ BT_GATT_PRIMARY_SERVICE(HAL_BLE_UUID_SERVICE),
 	BT_GATT_CHARACTERISTIC(HAL_BLE_UUID_LEDS_CHAR,
 		BT_GATT_CHRC_WRITE, BT_GATT_PERM_WRITE, 
 		NULL, Hal_Ble_WriteLeds, NULL),
+	BT_GATT_CHARACTERISTIC(HAL_BLE_UUID_VBATT_CHAR,
+		BT_GATT_CHRC_NOTIFY, BT_GATT_PERM_NONE, 
+		NULL, NULL, NULL),
+	BT_GATT_CCC(Hal_Ble_NotifyVbatt,
+		BT_GATT_PERM_READ | BT_GATT_PERM_WRITE),	
 );
+
+/* Thread definition for BLE data processing (notifications) */
+K_THREAD_DEFINE(Hal_Ble_Thread, HAL_BLE_THREAD_STACKSIZE, Hal_Ble_ThreadNotify, NULL, NULL, NULL, HAL_BLE_THREAD_PRIORITY, 0U, 0U);
+
+static uint8_t Hal_Ble_NotifyCharStatus[HAL_IPC_MAX];
 
 /***********************************************************************************************************
  ******************************************* Exported functions ********************************************
@@ -119,6 +135,30 @@ System_Ret_t Hal_Ble_StopAdvertising(void)
  ******************************************** Local functions **********************************************
  ***********************************************************************************************************/
 
+/*!	
+ * \brief Task to handle BLE notificcations
+ * 
+ * @param unused1 Unused parameter.
+ * @param unused2 Unused parameter.
+ * @param unused3 Unused parameter.
+ * @return None
+ */
+static void Hal_Ble_ThreadNotify(void *unused1, void *unused2, void *unused3)
+{
+	uint8_t data_vbatt;
+
+    while(1)
+    {
+        k_msleep(1000);
+
+        if(Hal_Ble_NotifyCharStatus[HAL_IPC_VBATT])
+        {
+			Hal_Ipc_Get(HAL_IPC_VBATT, &data_vbatt);
+            bt_gatt_notify(NULL, &Hal_Ble_service.attrs[4], &data_vbatt, HAL_IPC_VBAT_LEN);
+        }
+    }
+}
+
 static void Hal_Ble_Connected(struct bt_conn *conn, uint8_t err)
 {
 	Hal_Ble_ConnectedCb(conn, err);
@@ -154,4 +194,9 @@ static ssize_t Hal_Ble_WriteLeds(struct bt_conn *conn, const struct bt_gatt_attr
 	}
 
 	return ret_val;
+}
+
+static void Hal_Ble_NotifyVbatt(const struct bt_gatt_attr *attr, uint16_t value)
+{
+	Hal_Ble_NotifyCharStatus[HAL_IPC_VBATT] = (value == BT_GATT_CCC_NOTIFY);
 }

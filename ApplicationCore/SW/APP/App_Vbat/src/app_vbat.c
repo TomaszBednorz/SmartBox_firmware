@@ -5,6 +5,7 @@
 #include "app_vbat.h"
 #include "app_vbat_cfg.h"
 #include "hal_vbat.h"
+#include "app_ipc.h"
 #include "lowpass_filter.h"
 
 /***********************************************************************************************************
@@ -16,9 +17,9 @@
 #define APP_VBAT_DECYL_FACTOR           (10.0f)
 
 /**
- * @brief Rounds a floating-point number to the nearest tenth.
+ * @brief Converts a floating-point number to U8 format.
  */
-#define App_Vbat_RoundFloat(num)    (float)(((uint16_t)((num + 0.05f) / 0.1f)) * 0.1f)
+#define App_Vbat_FloatToU8(num)        ((uint8_t)((num + 0.5f)))
 
 /**
  * @brief Converts raw ADC value to millivolts.
@@ -75,7 +76,7 @@ void App_Vbat_Init(void)
 static void App_Vbat_ThreadProcessData(void *unused1, void *unused2, void *unused3)
 {
     uint16_t vbat_raw;
-    float vbat_pr;
+    uint8_t vbat_pr;
     
     while(1)
     {
@@ -85,7 +86,7 @@ static void App_Vbat_ThreadProcessData(void *unused1, void *unused2, void *unuse
         {
             vbat_pr = App_Vbat_CalculateBatteryCondition(vbat_raw);
 
-            // SEND IPC
+            App_Ipc_Write(APP_IPC_TYPE_VBATT, &vbat_pr);
         }   
     }
 }
@@ -94,7 +95,7 @@ static void App_Vbat_ThreadProcessData(void *unused1, void *unused2, void *unuse
  * @brief Calculates the battery condition based on raw ADC value.
  * 
  * @param raw_adc Raw ADC value.
- * @return Battery condition as a percentage (0.1% precision)
+ * @return Battery condition as a percentage
  */
 static float App_Vbat_CalculateBatteryCondition(uint16_t raw_adc)
 {
@@ -106,7 +107,7 @@ static float App_Vbat_CalculateBatteryCondition(uint16_t raw_adc)
 
     vbat_percent = App_Vbat_EstimateBatteryPercent(vbat_filtered);
 
-    return App_Vbat_RoundFloat(vbat_percent);
+    return App_Vbat_FloatToU8(vbat_percent);
 }
 
 /**

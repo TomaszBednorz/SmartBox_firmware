@@ -1,50 +1,28 @@
-#ifndef _HAL_BLE_CFG_H_
-#define _HAL_BLE_CFG_H_
+#ifndef _HAL_IPC_DECODE_H_
+#define _HAL_IPC_DECODE_H_
 
 /***********************************************************************************************************
  ********************************************* Included files **********************************************
  ***********************************************************************************************************/
 
-#include "hal_ipc.h"
-#include "hal_ipc_decode.h"
+#include "system_utils.h"
+
 /***********************************************************************************************************
  ************************************************* Macros **************************************************
  ***********************************************************************************************************/
 
-/* 
- * Callbacks 
- */
-#define Hal_Ble_ConnectedCb(conn, err)          do{} while(0)
-#define Hal_Ble_DisconnectedCb(conn, reason)    do{} while(0)
-#define Hal_Ble_WriteLedsCb(buf, len)           Hal_Ipc_Send(len, buf)
-
-/*
- * Advertising interval configuration, scale factor = 0.625ms
- */
-#define HAL_BLE_ADVERT_INTERVAL_MIN     (800U)  /* 500ms */
-#define HAL_BLE_ADVERT_INTERVAL_MAX     (960U)  /* 600ms */
-
-/*
- * UUID (Universally Unique Identifier) definisions
- */
-#define HAL_BLE_UUID_SERVICE_VAL      BT_UUID_128_ENCODE(0x00001523, 0x1112, 0xefde, 0x1523, 0x785feabcd123)
-#define HAL_BLE_UUID_LEDS_CHAR_VAL    BT_UUID_128_ENCODE(0x00001524, 0x1112, 0xefde, 0x1523, 0x785feabcd123)
-#define HAL_BLE_UUID_VBATT_CHAR_VAL   BT_UUID_128_ENCODE(0x00001525, 0x1112, 0xefde, 0x1523, 0x785feabcd123)
-
-#define HAL_BLE_UUID_SERVICE          BT_UUID_DECLARE_128(HAL_BLE_UUID_SERVICE_VAL)
-#define HAL_BLE_UUID_LEDS_CHAR        BT_UUID_DECLARE_128(HAL_BLE_UUID_LEDS_CHAR_VAL)
-#define HAL_BLE_UUID_VBATT_CHAR       BT_UUID_DECLARE_128(HAL_BLE_UUID_VBATT_CHAR_VAL)
-
-#define HAL_BLE_LEDS_DATA_LEN         (8U)
-#define HAL_BLE_VBATT_DATA_LEN        (6U)
-
-
- #define HAL_BLE_THREAD_STACKSIZE   (1024U)
- #define HAL_BLE_THREAD_PRIORITY    (3U)
+#define HAL_IPC_VBAT_LEN    (1U)
 
 /***********************************************************************************************************
  *********************************************** Data types ************************************************
  ***********************************************************************************************************/
+
+typedef enum
+{
+    HAL_IPC_LEDS = 0,
+    HAL_IPC_VBATT,
+    HAL_IPC_MAX
+}Hal_Ipc_DataType_t;
 
 /***********************************************************************************************************
  ********************************************* Exported objects ********************************************
@@ -54,4 +32,7 @@
  ************************************** Exported function prototypes ***************************************
  ***********************************************************************************************************/
 
-#endif  /* _APP_BLE_CFG_H_ */
+void Hal_Ipc_Decode(uint8_t len, uint8_t* data);
+void Hal_Ipc_Get(Hal_Ipc_DataType_t type, uint8_t* data);
+
+#endif  /* _HAL_IPC_DECODE_H_ */

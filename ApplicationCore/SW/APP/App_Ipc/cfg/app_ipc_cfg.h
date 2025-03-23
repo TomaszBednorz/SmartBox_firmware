@@ -20,7 +20,8 @@
  * name, id (0-31), len, read data permission, write data permission
  */
 #define APP_IPC_MESSAGE_CFG_TABLE(X) \
-    X(APP_IPC_TYPE_LEDS, 0x00, 6U, false, true)
+    X(APP_IPC_TYPE_LEDS, 0x00, 6U, true, false) \
+    X(APP_IPC_TYPE_VBATT, 0x01, 1U, false, true)
 
 
 /***********************************************************************************************************
