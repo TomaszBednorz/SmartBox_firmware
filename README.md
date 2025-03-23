@@ -11,10 +11,8 @@ The main purpose of this project is to create an IoT device with simple function
 - [x] BLE
 - [ ] Pedometer, IMU
 - [ ] Sensors
-- [ ] Real time clock and buzzer, alarm
 - [x] RGB diode, PWM
-- [ ] Battery condition
-- [ ] Button
+- [x] Battery condition
 - [x] Interprocessor communication
 
 # Description of functionalities
@@ -27,4 +25,8 @@ Lighting of the RGB LED can be adjusted by sending data via Bluetooth. The image
 <img src="https://github.com/user-attachments/assets/2273c3ef-3071-43b8-9727-ddb4c1cf7e64" height="435"/>
 <img src="https://github.com/user-attachments/assets/27eaaca5-a704-42cc-8819-a9084d6740be" height="435"/>
 
+## Battery condition
 
+Battery condition as a percentage can be received via Bluetooth.
+
+<img src="https://github.com/user-attachments/assets/a32d0135-d1d2-458c-8802-81555ce12514" height="435"/>
