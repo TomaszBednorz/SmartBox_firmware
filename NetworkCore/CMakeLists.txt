@@ -16,4 +16,5 @@ target_include_directories(app PRIVATE
 target_sources(app PRIVATE 
     SW/main.c 
     SW/HAL/Hal_Ble/src/hal_ble.c
-    SW/HAL/Hal_Ipc/src/hal_ipc.c)
+    SW/HAL/Hal_Ipc/src/hal_ipc.c
+    SW/HAL/Hal_Ipc/cfg/hal_ipc_decode.c)

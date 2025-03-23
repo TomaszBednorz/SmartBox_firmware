@@ -2,25 +2,21 @@
  ********************************************* Included files **********************************************
  ***********************************************************************************************************/
 
-#include "drv_gpio.h"
 #include <zephyr/drivers/gpio.h>
+#include <zephyr/drivers/adc.h>
+
+#include "hal_vbat.h"
 
 /***********************************************************************************************************
  ************************************************* Macros **************************************************
  ***********************************************************************************************************/
 
+#define HAL_VBAT_VBAT_MEAS_PIN_ENABLE      (1)
+#define HAL_VBAT_VBAT_MEAS_PIN_DISABLE     (0)
+
 /***********************************************************************************************************
  *********************************************** Data types ************************************************
  ***********************************************************************************************************/
-
-/**
- * @brief Structure to hold GPIO specification.
- */
-typedef struct {
-    struct gpio_dt_spec spec;
-    uint32_t direction;
-    uint32_t interrupts;
-}Drv_Gpio_Spec_t;
 
 /***********************************************************************************************************
  **************************************** Local function prototypes ****************************************
@@ -34,10 +30,13 @@ typedef struct {
  ********************************************* Local objects ***********************************************
  ***********************************************************************************************************/
 
-static const Drv_Gpio_Spec_t Hal_Gpio_Spec[DRV_GPIO_PIN_MAX] = {
-    #define DRV_GPIO_GENERATE_SPEC(name, label, prop, dir, int) {GPIO_DT_SPEC_GET(DT_NODELABEL(label), prop), dir, int},
-    DRV_GPIO_PINS_CFG_TABLE(DRV_GPIO_GENERATE_SPEC)
-    #undef DRV_GPIO_GENERATE_SPEC
+static const struct gpio_dt_spec Hal_Vbat_PinVbatMeasEn = GPIO_DT_SPEC_GET(DT_NODELABEL(vbatt), power_gpios);
+static const struct adc_dt_spec Hal_Vbat_AdcChannel = ADC_DT_SPEC_GET(DT_NODELABEL(vbatt));
+
+static int16_t Hal_Vbat_Buf;
+static struct adc_sequence Hal_Vbat_Sequence = {
+    .buffer = &Hal_Vbat_Buf,
+    .buffer_size = sizeof(Hal_Vbat_Buf),
 };
 
 /***********************************************************************************************************
@@ -45,53 +44,65 @@ static const Drv_Gpio_Spec_t Hal_Gpio_Spec[DRV_GPIO_PIN_MAX] = {
  ***********************************************************************************************************/
 
 /**
- * @brief Initialize the GPIO driver.
+ * @brief Initialize the VBAT hardware abstraction layer.
  * 
  * @return System_Ret_t SYSTEM_OK if initialization is successful, otherwise SYSTEM_NOK.
  */
-System_Ret_t Drv_Gpio_Init(void)
+System_Ret_t Hal_Vbat_Init(void)
 {
     System_Ret_t ret = SYSTEM_OK;
 
-    for(uint8_t i = 0; i < (uint8_t)DRV_GPIO_PIN_MAX; i++)
+    /* Initialize VBAT enable pin */
+    if(true != device_is_ready(Hal_Vbat_PinVbatMeasEn.port))
     {
-        if(true != device_is_ready(Hal_Gpio_Spec[i].spec.port))
-        {
-            ret = SYSTEM_NOK;
-        }
+        ret = SYSTEM_NOK;
+    }
 
-        if(0 > gpio_pin_configure_dt(&Hal_Gpio_Spec[i].spec, Hal_Gpio_Spec[i].direction))
-        {
-            ret = SYSTEM_NOK;
-        }
+    if(0 > gpio_pin_configure_dt(&Hal_Vbat_PinVbatMeasEn, GPIO_OUTPUT_LOW))
+    {
+        ret = SYSTEM_NOK;
+    }
+
+    /* Initialize VBAT ADC channel */
+    if (!adc_is_ready_dt(&Hal_Vbat_AdcChannel))
+    {
+        ret = SYSTEM_NOK;
+    }
+
+    if (adc_channel_setup_dt(&Hal_Vbat_AdcChannel) < 0) 
+    {
+        ret = SYSTEM_NOK;
+    }
+
+    if (adc_sequence_init_dt(&Hal_Vbat_AdcChannel, &Hal_Vbat_Sequence) < 0) 
+    {
+        ret = SYSTEM_NOK;
     }
 
     return ret;
 }
 
 /**
- * @brief Write a state to a OUTPUT pin.
+ * @brief Trigger a VBAT measurement.
  * 
- * @param pin The GPIO pin to write to.
- * @param state The state to write (DRV_GPIO_PIN_STATE_ACTIVE or DRV_GPIO_PIN_STATE_INACTIVE).
+ * @param buf Pointer to store the measurement result.
+ * @return System_Ret_t SYSTEM_OK if measurement is successful, otherwise SYSTEM_NOK.
  */
-void Drv_Gpio_Write(Drv_Gpio_Pin_t pin, int state)
+System_Ret_t Hal_Vbat_TrigMeasurement(uint16_t *buf)
 {
-    if(pin < DRV_GPIO_PIN_MAX)
-    {
-        gpio_pin_set_dt(&Hal_Gpio_Spec[pin].spec, state);   
-    }
-}
+    System_Ret_t ret = SYSTEM_NOK;
 
-/**
- * @brief Read the state of a INPUT pin.
- * 
- * @param pin The GPIO pin to read from.
- * @return int The state of the GPIO pin (DRV_GPIO_PIN_STATE_ACTIVE or DRV_GPIO_PIN_STATE_INACTIVE).
- */
-int Drv_Gpio_Read(Drv_Gpio_Pin_t pin)
-{
-    return gpio_pin_get_dt(&Hal_Gpio_Spec[pin].spec);
+    gpio_pin_set_dt(&Hal_Vbat_PinVbatMeasEn, HAL_VBAT_VBAT_MEAS_PIN_ENABLE);   
+
+    if (0 == adc_read(Hal_Vbat_AdcChannel.dev, &Hal_Vbat_Sequence)) 
+    {
+        *buf = (uint16_t)Hal_Vbat_Buf;
+        ret = SYSTEM_OK;
+    }
+
+    gpio_pin_set_dt(&Hal_Vbat_PinVbatMeasEn, HAL_VBAT_VBAT_MEAS_PIN_DISABLE);
+
+    return ret;
 }
 
 /***********************************************************************************************************

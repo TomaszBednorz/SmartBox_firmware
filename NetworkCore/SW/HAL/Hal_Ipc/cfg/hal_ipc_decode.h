@@ -1,34 +1,28 @@
-#ifndef _DRV_GPIO_H_
-#define _DRV_GPIO_H_
+#ifndef _HAL_IPC_DECODE_H_
+#define _HAL_IPC_DECODE_H_
 
 /***********************************************************************************************************
  ********************************************* Included files **********************************************
  ***********************************************************************************************************/
 
 #include "system_utils.h"
-#include "drv_gpio_cfg.h"
 
 /***********************************************************************************************************
  ************************************************* Macros **************************************************
  ***********************************************************************************************************/
 
-#define DRV_GPIO_PIN_STATE_ACTIVE     (1)
-#define DRV_GPIO_PIN_STATE_INACTIVE   (0)
+#define HAL_IPC_VBAT_LEN    (1U)
 
 /***********************************************************************************************************
  *********************************************** Data types ************************************************
  ***********************************************************************************************************/
 
-/**
- * @brief Enumeration of GPIO pins.
- */
 typedef enum
 {
-    #define DRV_GPIO_GENERATE_PIN(name, label, prop, dir, int) name,
-    DRV_GPIO_PINS_CFG_TABLE(DRV_GPIO_GENERATE_PIN)
-    #undef DRV_GPIO_GENERATE_PIN
-    DRV_GPIO_PIN_MAX
-} Drv_Gpio_Pin_t;
+    HAL_IPC_LEDS = 0,
+    HAL_IPC_VBATT,
+    HAL_IPC_MAX
+}Hal_Ipc_DataType_t;
 
 /***********************************************************************************************************
  ********************************************* Exported objects ********************************************
@@ -38,8 +32,7 @@ typedef enum
  ************************************** Exported function prototypes ***************************************
  ***********************************************************************************************************/
 
-System_Ret_t Drv_Gpio_Init(void);
-void Drv_Gpio_Write(Drv_Gpio_Pin_t pin, int state);
-int Drv_Gpio_Read(Drv_Gpio_Pin_t pin);
+void Hal_Ipc_Decode(uint8_t len, uint8_t* data);
+void Hal_Ipc_Get(Hal_Ipc_DataType_t type, uint8_t* data);
 
-#endif  /* _DRV_GPIO_H_ */
+#endif  /* _HAL_IPC_DECODE_H_ */

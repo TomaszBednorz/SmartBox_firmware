@@ -9,18 +9,19 @@
  ************************************************* Macros **************************************************
  ***********************************************************************************************************/
 
- /* Max size of internal IPC buffers */
- #define APP_IPC_MAX_DATA_BUF_SIZE      (20U)
+/* Max size of internal IPC buffers */
+#define APP_IPC_MAX_DATA_BUF_SIZE      (20U)
 
- #define APP_IPC_THREAD_STACKSIZE   (1024U)
- #define APP_IPC_THREAD_PRIORITY    (4U)
+#define APP_IPC_THREAD_STACKSIZE   (1024U)
+#define APP_IPC_THREAD_PRIORITY    (4U)
 
 /* 
  * Message configuration table:
  * name, id (0-31), len, read data permission, write data permission
  */
 #define APP_IPC_MESSAGE_CFG_TABLE(X) \
-    X(APP_IPC_TYPE_LEDS, 0x00, 6U, false, true)
+    X(APP_IPC_TYPE_LEDS, 0x00, 6U, true, false) \
+    X(APP_IPC_TYPE_VBATT, 0x01, 1U, false, true)
 
 
 /***********************************************************************************************************

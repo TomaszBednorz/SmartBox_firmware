@@ -1,46 +1,38 @@
-#ifndef _HAL_BLE_CFG_H_
-#define _HAL_BLE_CFG_H_
+#ifndef _APP_VBAT_CFG_H_
+#define _APP_VBAT_CFG_H_
 
 /***********************************************************************************************************
  ********************************************* Included files **********************************************
  ***********************************************************************************************************/
 
-#include "hal_ipc.h"
-#include "hal_ipc_decode.h"
+#include "system_utils.h"
+
 /***********************************************************************************************************
  ************************************************* Macros **************************************************
  ***********************************************************************************************************/
 
+#define APP_VBAT_THREAD_STACKSIZE   (1024U)
+#define APP_VBAT_THREAD_PRIORITY    (8U)
+#define APP_VBAT_RHREAD_PERIOD      (100)  /* ms */
+
+/* Calculation of the scaling factor - voltage devider*/
+#define APP_VBAT_CFG_OUTPUT_OHMS   (180000.0f)  // R1
+#define APP_VBAT_CFG_FULL_OHMS     (1500000.0f + 180000.0f)  // R2
+#define APP_VBAT_CFG_SCALE_FACTOR  ((float)APP_VBAT_CFG_FULL_OHMS / (float)APP_VBAT_CFG_OUTPUT_OHMS)
+
+#define APP_VBAT_CFG_ADC_RESOLUTION (4096.0f)  /* 12-bit ADC */
+#define APP_VBAT_CFG_ADC_MAX_VREF   (600.f)    /* mV */
+
+/* Smoothing factor for the lowpass filter */
+#define APP_VBAT_FILTER_ALFA		(0.5f)
+
 /* 
- * Callbacks 
+ * LITHIUM_ION_POLYMER 
+ * The curve is 11 element representing the OCV voltage in miliovolts for each charge percentage
+ * from 0% to 100% inclusive in 10% increments.
  */
-#define Hal_Ble_ConnectedCb(conn, err)          do{} while(0)
-#define Hal_Ble_DisconnectedCb(conn, reason)    do{} while(0)
-#define Hal_Ble_WriteLedsCb(buf, len)           Hal_Ipc_Send(len, buf)
-
-/*
- * Advertising interval configuration, scale factor = 0.625ms
- */
-#define HAL_BLE_ADVERT_INTERVAL_MIN     (800U)  /* 500ms */
-#define HAL_BLE_ADVERT_INTERVAL_MAX     (960U)  /* 600ms */
-
-/*
- * UUID (Universally Unique Identifier) definisions
- */
-#define HAL_BLE_UUID_SERVICE_VAL      BT_UUID_128_ENCODE(0x00001523, 0x1112, 0xefde, 0x1523, 0x785feabcd123)
-#define HAL_BLE_UUID_LEDS_CHAR_VAL    BT_UUID_128_ENCODE(0x00001524, 0x1112, 0xefde, 0x1523, 0x785feabcd123)
-#define HAL_BLE_UUID_VBATT_CHAR_VAL   BT_UUID_128_ENCODE(0x00001525, 0x1112, 0xefde, 0x1523, 0x785feabcd123)
-
-#define HAL_BLE_UUID_SERVICE          BT_UUID_DECLARE_128(HAL_BLE_UUID_SERVICE_VAL)
-#define HAL_BLE_UUID_LEDS_CHAR        BT_UUID_DECLARE_128(HAL_BLE_UUID_LEDS_CHAR_VAL)
-#define HAL_BLE_UUID_VBATT_CHAR       BT_UUID_DECLARE_128(HAL_BLE_UUID_VBATT_CHAR_VAL)
-
-#define HAL_BLE_LEDS_DATA_LEN         (8U)
-#define HAL_BLE_VBATT_DATA_LEN        (6U)
-
-
- #define HAL_BLE_THREAD_STACKSIZE   (1024U)
- #define HAL_BLE_THREAD_PRIORITY    (3U)
+#define APP_VBAT_CFG_BATTERY_CURVE                                             \
+	{2502.0f, 3146.0f, 3372.0f, 3449.0f, 3532.0f, 3602.0f, 3680.0f, 3764.0f, 3842.0f, 3936.0f, 4032.0f}  /* mV */
 
 /***********************************************************************************************************
  *********************************************** Data types ************************************************
@@ -54,4 +46,4 @@
  ************************************** Exported function prototypes ***************************************
  ***********************************************************************************************************/
 
-#endif  /* _APP_BLE_CFG_H_ */
+#endif  /* _APP_VBAT_CFG_H_ */
