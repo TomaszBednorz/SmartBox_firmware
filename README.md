@@ -1,19 +1,14 @@
 # SmartBox_firmware
 
-PROJECT IN PROGRESS
-
-The main purpose of this project is to create an IoT device with simple functionalities, such as a pedometer, an alarm clock, and more. Additionally, all information will be logged via Bluetooth Low Energy. The project is being developed using the Nordic Thingy:53 IoT prototyping platform with the nrf5340 microcontroller, containing two Cortex-M33 cores. The application core is proposed for functional features, and the network core is proposed for Bluetooth communication.
+The main purpose of this project is to create an IoT device with simple functionalities, such as LED control, VBAT measurement, and more. Additionally, all information will be logged via Bluetooth Low Energy. The project is being developed using the Nordic Thingy:53 IoT prototyping platform with the nrf5340 microcontroller, containing two Cortex-M33 cores. The application core is proposed for functional features, and the network core is proposed for Bluetooth communication.
 
 ![image](https://github.com/user-attachments/assets/e0ee9319-ed88-4ec2-8973-d4d5af46eb1b)
 
-
 # TODO list
 - [x] BLE
-- [ ] Pedometer, IMU
-- [ ] Sensors
 - [x] RGB diode, PWM
-- [x] Battery condition
-- [x] Interprocessor communication
+- [x] Battery condition, ADC
+- [x] Interprocessor communication, IPC
 
 # Description of functionalities
 
